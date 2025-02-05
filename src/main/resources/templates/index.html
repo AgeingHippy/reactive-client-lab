@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+    <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row m-3"></div>
+    <div class="row justify-content-center mb-2">
+        <div class="col-lg-6"><h4>Photo Search:</h4></div>
+    </div>
+    <div class="row justify-content-center mb-4">
+        <form class="col-lg-6" th:action="@{/}" th:object="${searchKey}" method="post">
+            <div class="input-group">
+                <span class="input-group-text">Keywords:</span>
+                <input type="text" class="form-control" th:field="*{text}" th:value="${searchText}">
+                <button class="btn btn-info" type="submit">Search!</button>
+            </div>
+            <div class="input-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="orientation" id="landscape" value="landscape">
+                    <label class="form-check-label" for="landscape">
+                        Landscape
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="orientation" id="portrait" value="portrait">
+                    <label class="form-check-label" for="portrait">
+                        Portrait
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="orientation" id="squarish" value="squarish">
+                    <label class="form-check-label" for="squarish">
+                        Squarish
+                    </label>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="provider" id="pexels" value="pexels" checked>
+                    <label class="form-check-label" for="pexels">
+                        Pexels
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="provider" id="unsplash" value="unsplash">
+                    <label class="form-check-label" for="unsplash">
+                        Unsplash
+                    </label>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <dif th:if="${providerDetails} ne null">
+        <a th:if="${providerDetails.name} eq 'Pexels'" href="https://www.pexels.com"
+           th:text="|'Images provided by '${providerDetails.name}|">Link</a>
+        <a th:if="${providerDetails.name} eq 'Unsplash'" href="https://unsplash.com"
+           th:text="|'Images provided by '${providerDetails.name}|">Link</a>
+    </dif>
+
+    <div class="row justify-content-center" id="contentRow">
+        <!--this script updates Masonry each time an image is loaded-->
+        <script type="text/javascript">
+            // select the image row and initialize Masonry
+            var grid = document.getElementById('contentRow');
+            var masonry = new Masonry(grid, {
+              itemSelector: '.image-item',
+              percentPosition: true
+            });
+
+            // create a MutationObserver to update Masonry layout with new images
+            var observer = new MutationObserver(mutations => {
+              mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                  if (node.matches && node.matches('.image-item')) {
+                    masonry.appended(node);
+                    masonry.layout();
+                  }
+                });
+              });
+            });
+
+            // start observing the grid for new child elements
+            observer.observe(grid, { childList: true });
+        </script>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-2 image-item" th:each="photo : ${photos}">
+            <!--            <p th:if="${photo.description} eq 'No images returned'">No images returned</p>-->
+            <!--            <div th:unless="${photo.description} eq 'No images returned'">-->
+            <img class="rounded img-fluid" th:src="${photo.urls.thumb}" th:alt="${photo.description}">
+            <!--            </div>-->
+        </div>
+    </div>
+</div>
+</body>
+</html>
